@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# Configures localhost and facebook.com IP resolution
+# Configures localhost and facebook.com IPs
+
+if [ "$EUID" -ne 0 ]; then
+    exit 0
+fi
 
 sed -i 's/^127\.0\.0\.1[[:space:]]\+localhost/127.0.0.2 localhost/' /etc/hosts
 
