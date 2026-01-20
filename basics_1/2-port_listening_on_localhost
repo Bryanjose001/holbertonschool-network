@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-# Script that listens on port 98 on localhost
+# Displays all active IPv4 IPs on the machine
 
-nc -l 127.0.0.1 98
+ip -4 addr show | awk '{print $2}' | cut -d/ -f1

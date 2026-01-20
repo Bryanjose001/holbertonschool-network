@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Script that configures hosts file
+# Configures localhost and facebook.com IP resolution
 
-sudo tee /etc/hosts > /dev/null <<EOF
-127.0.0.2 localhost
-8.8.8.8 facebook.com
-EOF
+sed -i 's/^127\.0\.0\.1[[:space:]]\+localhost/127.0.0.2 localhost/' /etc/hosts
+
+sed -i '/facebook.com/d' /etc/hosts
+
+echo "8.8.8.8 facebook.com" >> /etc/hosts
