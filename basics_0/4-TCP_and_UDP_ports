@@ -1,3 +1,20 @@
 #!/usr/bin/env bash
-# Script that displays listening 
-netstat -lp
+# Displays all listening TCP and UDP ports with PID and program name
+
+# Check if net-tools (netstat) is installed; fallback to ss if not
+if command -v netstat >/dev/null 2>&1; then
+    echo "Active Internet connections (only servers)"
+    # -l : listening sockets
+    # -p : show PID/Program name
+    # -t : TCP
+    # -u : UDP
+    netstat -tulpn
+else
+    echo "netstat not found, using ss instead"
+    echo "Active Internet connections (only servers)"
+    # -l : listening
+    # -t : TCP
+    # -u : UDP
+    # -p : show process
+    ss -tulpn
+fi
