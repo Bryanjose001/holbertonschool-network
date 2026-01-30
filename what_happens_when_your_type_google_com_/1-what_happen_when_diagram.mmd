@@ -1,0 +1,105 @@
+graph TB
+    Start([User types https://www.google.com<br/>and presses Enter])
+    
+    Start --> BrowserCache{Browser checks<br/>DNS Cache}
+    
+    subgraph "DNS RESOLUTION"
+        BrowserCache -->|Not Found| OSCache{OS DNS Cache}
+        OSCache -->|Not Found| ISPResolver[ISP DNS Resolver]
+        ISPResolver --> RootServer[Root Name Server<br/>.]
+        RootServer --> TLDServer[TLD Server<br/>.com]
+        TLDServer --> AuthServer[Authoritative Server<br/>google.com]
+        AuthServer --> IPResolved[IP Address Resolved<br/>172.217.164.78]
+        BrowserCache -->|Found| IPResolved
+        OSCache -->|Found| IPResolved
+    end
+    
+    IPResolved --> TCPHandshake[TCP Three-Way Handshake<br/>SYN → SYN-ACK → ACK]
+    
+    subgraph "ENCRYPTED TRAFFIC"
+        TCPHandshake --> SSLHandshake[SSL/TLS Handshake<br/>🔒 Encryption Established]
+        SSLHandshake --> EncryptedRequest[HTTPS Request Encrypted<br/>Port 443]
+    end
+    
+    EncryptedRequest --> Firewall1
+    
+    subgraph "FIREWALL LAYER"
+        Firewall1[🛡️ Firewall<br/>Packet Inspection<br/>Security Rules Check]
+        Firewall1 --> FirewallPass{Traffic<br/>Allowed?}
+        FirewallPass -->|No| Blocked[❌ Request Blocked]
+        FirewallPass -->|Yes| PassThrough[✅ Traffic Passes]
+    end
+    
+    PassThrough --> LoadBalancer
+    
+    subgraph "LOAD BALANCER"
+        LoadBalancer[⚖️ Load Balancer<br/>HAProxy/Nginx]
+        LoadBalancer --> HealthCheck{Check Server<br/>Health}
+        HealthCheck --> Distribution[Distribute Request<br/>Round Robin/Least Connections]
+        Distribution --> Server1[Web Server 1]
+        Distribution --> Server2[Web Server 2]
+        Distribution --> Server3[Web Server 3]
+    end
+    
+    Server1 --> WebServerProcess
+    Server2 --> WebServerProcess
+    Server3 --> WebServerProcess
+    
+    subgraph "WEB SERVER"
+        WebServerProcess[🌐 Web Server<br/>Nginx/Apache<br/>IP: 172.217.164.78:443]
+        WebServerProcess --> ParseRequest[Parse HTTP Headers<br/>Determine Content Type]
+        ParseRequest --> ContentType{Static or<br/>Dynamic?}
+        ContentType -->|Static| ServeStatic[Serve Static Files<br/>HTML/CSS/JS/Images]
+        ContentType -->|Dynamic| ForwardApp[Forward to<br/>Application Server]
+    end
+    
+    ForwardApp --> AppServer
+    
+    subgraph "APPLICATION SERVER"
+        AppServer[⚙️ Application Server<br/>Node.js/Django/Flask]
+        AppServer --> ProcessLogic[Process Business Logic<br/>Execute Backend Code]
+        ProcessLogic --> NeedData{Need<br/>Data?}
+        NeedData -->|Yes| QueryDB[Query Database]
+        NeedData -->|No| GenerateResponse[Generate Response]
+    end
+    
+    QueryDB --> Database
+    
+    subgraph "DATABASE LAYER"
+        Database[(🗄️ Database<br/>MySQL/PostgreSQL/MongoDB)]
+        Database --> ExecuteQuery[Execute SQL/NoSQL Query]
+        ExecuteQuery --> FetchData[Fetch/Update Data<br/>Ensure Consistency]
+        FetchData --> ReturnData[Return Data to App Server]
+    end
+    
+    ReturnData --> GenerateResponse
+    GenerateResponse --> HTMLPage[Generate HTML Page]
+    
+    HTMLPage --> WebServerResponse[Web Server receives<br/>generated page]
+    ServeStatic --> WebServerResponse
+    
+    WebServerResponse --> LBResponse[Load Balancer<br/>forwards response]
+    LBResponse --> FirewallResponse[🛡️ Firewall<br/>inspects outbound traffic]
+    FirewallResponse --> EncryptedResponse[🔒 HTTPS Response<br/>Encrypted via SSL/TLS]
+    
+    EncryptedResponse --> BrowserReceive[Browser Receives Response]
+    BrowserReceive --> ParseHTML[Parse HTML]
+    ParseHTML --> FetchResources[Fetch Additional Resources<br/>CSS, JavaScript, Images]
+    FetchResources --> RenderPage[Render Page]
+    RenderPage --> DisplayPage([✨ Display www.google.com<br/>to User])
+    
+    Blocked --> End([Request Failed])
+    
+    style Start fill:#e1f5ff
+    style DisplayPage fill:#c8e6c9
+    style Blocked fill:#ffcdd2
+    style End fill:#ffcdd2
+    style Firewall1 fill:#ff6b6b
+    style FirewallResponse fill:#ff6b6b
+    style LoadBalancer fill:#4ecdc4
+    style SSLHandshake fill:#ffd93d
+    style EncryptedRequest fill:#ffd93d
+    style EncryptedResponse fill:#ffd93d
+    style Database fill:#a29bfe
+    style AppServer fill:#fd79a8
+    style WebServerProcess fill:#fdcb6e
